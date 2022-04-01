@@ -8,13 +8,14 @@ import os
 # list of command line arguments
 argumentList = sys.argv[1:]
 # Options
-options = "hd:f:"
+options = "hsd:f:"
 # Long options
-long_options = ["help", "days:", "file:"]
+long_options = ["help", "stop" "days:", "file:"]
 
 #Default values
 file = "/var/log/esxi.log"
 days = 0
+stop = False
 try:
     # Parsing argument
     arguments, values = getopt.getopt(argumentList, options, long_options)
@@ -28,7 +29,8 @@ This script generates logs which imitate failed login attempts to VMware ESXi. \
     General Options \n\
     -h, --help           Prints a short help text and exists\n\
     -d, --days <value>   Set number of days in past to generate logs. Default 0\n\
-    -f, --file <path>    Set log file. Default /var/log/esxi.log")
+    -f, --file <path>    Set log file. Default /var/log/esxi.log \n\
+    -s, --stop           Don't generate logs continuously")
             exit()
 
         elif currentArgument in ("-d", "--days"):
@@ -43,6 +45,9 @@ This script generates logs which imitate failed login attempts to VMware ESXi. \
             except ValueError as err:
                 print(f"{err}\n{type(err)}", file = sys.stderr)
                 exit(2)
+        elif currentArgument in ("-s", "--stop"):
+            stop = True
+
 except getopt.error as err:
     # output error, and return with an error code
     print(str(err), file = sys.stderr)
@@ -90,6 +95,9 @@ for i in reversed(range(86400*days)):
         logging.debug(
             '{} {} Hostd: warning hostd[{}] [Originator@6876 sub=Default opID=esxui-{}-{}] Rejected password for user {} from {}'.format(
                 date, host, hostd, hex1, hex2, user, ip))
+
+if stop:
+    exit()
 while True:
     time.sleep(random.randint(100,3000)/1000)
     dt = datetime.fromtimestamp(time.time())
