@@ -71,7 +71,7 @@ else:
 try:
     logging.basicConfig(format='%(message)s', filename=file, level=logging.DEBUG, encoding='utf-8')
 except FileNotFoundError as err:
-    print(f"{err}\n{type(err)}", file=sys. stderr)
+    print(f"{err}\n{type(err)}", file=sys.stderr)
     exit(4)
 
 #print("2022-04-01 00:41:48 host6 Hostd: warning hostd[526387] [Originator@6876 sub=Default opID=esxui-9558-3741] Rejected password for user user-user5 from 10.16.89.3")
