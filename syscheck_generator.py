@@ -69,7 +69,7 @@ else:
     open(file_syscheck, 'a').close()
 
 try:
-    logging.basicConfig(format='%(message)s', filename=file_syscheck, level=logging.DEBUG, encoding='utf-8')
+    logging.basicConfig(format='%(message)s', filename=file_syscheck, level=logging.DEBUG)
 except FileNotFoundError as err:
     print(f"{err}\n{type(err)}", file=sys.stderr)
     exit(4)
@@ -121,7 +121,7 @@ for i in reversed(range(86400*days)):
         ip = random.choices(ip_list, weights=(10, 20, 30, 40, 50), k=1)[0]
         host = random.choices(host_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
         sha = random.choices(sha256_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
-        logging.debug('timestamp:{} hostname: {} ip:{} syscheck path:/home/clm/metricbeat/logs/metricbeat sha256:{}}}'. \
+        logging.debug('timestamp:{} hostname: {} ip:{} syscheck path:/home/clm/metricbeat/logs/metricbeat sha256:{}'. \
                       format(date, host, ip, sha))
 
 
@@ -134,5 +134,5 @@ while True:
     ip = random.choices(ip_list, weights=(10, 20, 30, 40, 50), k=1)[0]
     host = random.choices(host_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
     sha = random.choices(sha256_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
-    logging.debug('timestamp:{} hostname: {} ip:{} syscheck path:/home/clm/metricbeat/logs/metricbeat sha256:{}}}'. \
+    logging.debug('timestamp:{} hostname: {} ip:{} syscheck path:/home/clm/metricbeat/logs/metricbeat sha256:{}'. \
                   format(date, host, ip, sha))
