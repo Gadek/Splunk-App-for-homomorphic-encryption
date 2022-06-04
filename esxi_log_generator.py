@@ -1,11 +1,9 @@
-#testowa zmiana
 import random
 import time
 from datetime import datetime
 import logging
 import getopt, sys
 import os
-
 # Remove 1st argument from the
 # list of command line arguments
 argumentList = sys.argv[1:]
