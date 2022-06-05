@@ -10,3 +10,13 @@ This script generates logs which imitate failed login attempts to VMware ESXi.
     -d, --days <value>   Set number of days in past to generate logs. Default 0
     -f, --file <path>    Set log file. Default /var/log/esxi.log
     -s, --stop           Don't generate logs continuously
+
+
+
+# Homomorphic encryption demo
+
+1. Run `python splunk.py`
+
+2. In other terminal run `python ./processor.py fileA.pickle fileB.pickle`
+
+3. Press enter in the first terminal
