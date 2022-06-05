@@ -13,7 +13,7 @@ options = "hsd:f:"
 long_options = ["help", "stop" "days:", "file:"]
 
 #Default values
-file_syscheck = "/var/log/syscheck.log"
+file_syscheck = "/var/log/hashes.log"
 days = 0
 stop = False
 try:
@@ -24,12 +24,12 @@ try:
     for currentArgument, currentValue in arguments:
         if currentArgument in ("-h", "--help"):
             print("\
-This script generates logs which imitate failed login attempts to VMware ESXi. \n\n\
-    Usage: python3 esxi_logs_generator.py [OPTIONS...] \n\
+This script generates logs with hashes of variuos example files. \n\n\
+    Usage: python3 hashes_generator.py [OPTIONS...] \n\
     General Options \n\
     -h, --help           Prints a short help text and exists\n\
     -d, --days <value>   Set number of days in past to generate logs. Default 0\n\
-    -f, --file <path>    Set log file. Default /var/log/esxi.log \n\
+    -f, --file <path>    Set log file. Default /var/log/hashes.log \n\
     -s, --stop           Don't generate logs continuously")
             exit()
 
@@ -100,16 +100,18 @@ except FileNotFoundError as err:
     print(f"{err}\n{type(err)}", file=sys.stderr)
     exit(4)
 
-sha256_list = ["797ea8d5eb44d2daa60b2ffb830d3e40259e4af19b881900cfb8079584249106", \
-          "1df4d2577bd15b6c170f100cc9a3e8606ea6a9fa0f1f6aea858942b932603ab7", \
-          "5910dd2fc0422caf1b1e34262cdf333a40d1a48522855d30b8595ba6a14d216b", \
-          "733c9bc19762fa75e16f790940f7d934f8376e4693f41418b17ab77779fbf25f", \
-          "40126b305ff6f53f7c719d751658b752327a1c6e98890e41e488d7a81fa0db45", \
-          "02e837b66f177f4e41eb2f1c7ff6e4deb729a8473ac5c6e62629248d96f24622", \
-          "1678d0b345a0fec2ab34f8e564086dda66fb5eff555816e1b5fe4de1e731cf9f", \
-          "11ba3e87ec5e20a2d41063696b27ece12d644bd32892f33464d5d62ca9be492f", \
-          "542e47d9ff9767a5db0bb1479a55c275f5ca5b5d189498429ca8c96b6b0f4ffd", \
-           "1d25770d00c7d73191daacdef43f5fbe434e5dbf0b6b41b646cfc50eb6b07750"]
+sha256_list = [
+          ("797ea8d5eb44d2daa60b2ffb830d3e40259e4af19b881900cfb8079584249106","/var/file1"), \
+          ("1df4d2577bd15b6c170f100cc9a3e8606ea6a9fa0f1f6aea858942b932603ab7","/var/file2"), \
+          ("5910dd2fc0422caf1b1e34262cdf333a40d1a48522855d30b8595ba6a14d216b","/var/file3"), \
+          ("733c9bc19762fa75e16f790940f7d934f8376e4693f41418b17ab77779fbf25f","/var/file4"), \
+          ("40126b305ff6f53f7c719d751658b752327a1c6e98890e41e488d7a81fa0db45","/var/file5"), \
+          ("02e837b66f177f4e41eb2f1c7ff6e4deb729a8473ac5c6e62629248d96f24622","/var/file6"), \
+          ("1678d0b345a0fec2ab34f8e564086dda66fb5eff555816e1b5fe4de1e731cf9f","/var/file7"), \
+          ("11ba3e87ec5e20a2d41063696b27ece12d644bd32892f33464d5d62ca9be492f","/var/file8"), \
+          ("542e47d9ff9767a5db0bb1479a55c275f5ca5b5d189498429ca8c96b6b0f4ffd","/var/file9"), \
+          ("1d25770d00c7d73191daacdef43f5fbe434e5dbf0b6b41b646cfc50eb6b07750","/var/file0")
+            ]
 
 
 for i in reversed(range(86400*days)):
@@ -120,9 +122,9 @@ for i in reversed(range(86400*days)):
         date = dt.strftime("%Y-%m-%d %H:%M:%S")
         ip = random.choices(ip_list, weights=(10, 20, 30, 40, 50), k=1)[0]
         host = random.choices(host_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
-        sha = random.choices(sha256_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
-        logging.debug('timestamp:{} hostname: {} ip:{} syscheck path:/home/clm/metricbeat/logs/metricbeat sha256:{}'. \
-                      format(date, host, ip, sha))
+        sha, file = random.choices(sha256_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
+        logging.debug('timestamp:{} hostname: {} ip:{} path:{} sha256:{}'.\
+                      format(date, host, ip,file, sha))
 
 
 if stop:
@@ -133,6 +135,6 @@ while True:
     date = dt.strftime("%Y-%m-%d %H:%M:%S")
     ip = random.choices(ip_list, weights=(10, 20, 30, 40, 50), k=1)[0]
     host = random.choices(host_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
-    sha = random.choices(sha256_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
-    logging.debug('timestamp:{} hostname: {} ip:{} syscheck path:/home/clm/metricbeat/logs/metricbeat sha256:{}'. \
-                  format(date, host, ip, sha))
+    sha, file = random.choices(sha256_list, weights=(10, 20, 30, 40, 50, 60, 70, 80, 90, 100), k=1)[0]
+    logging.debug('timestamp:{} hostname: {} ip:{} path:{} sha256:{}'.\
+                  format(date, host, ip, file, sha))
