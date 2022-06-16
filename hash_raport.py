@@ -4,6 +4,14 @@ from dotenv import load_dotenv
 import os
 from time import sleep
 
+from Pyfhel import Pyfhel
+
+import src.FileIO as FileIO
+import src.PyfhelUtils as PyfhelUtils
+
+from src.operations.AddNumbersOperation import AddNumbersOperation
+from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
+from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
 
 malicious_hashes = list()
 with open("malicious hashes.txt") as f:
@@ -25,7 +33,7 @@ with open("malicious hashes.txt") as f:
 #     "offset", "count", "search", "field_list", "f", "output_mode"
 # ]
 
-search='search index=hashes'
+search='search index=hashes | head 2'
 create_dict = dict()
 create_dict['rf'] = "hash"
 create_dict['earliest_time'] = "-1m"
@@ -34,7 +42,47 @@ results_dict['count'] = 0
 results_dict['output_mode'] = "json"
 results_dict['field_list'] = "_raw hash"
 
+def __shorten_hashes(hashes):
+    short_hashes = []
+
+    for h in hashes:
+        short_hashes += [
+            h[:15]
+        ]
+    
+    return short_hashes
+
+def __getHEContext():
+    if os.path.exists('HE_context_and_keys'):
+        HE = PyfhelUtils.loadHE('HE_context_and_keys')
+        return HE
+
+    HE = Pyfhel()
+    HE.contextGen(scheme='bfv', n=2**15, t_bits=20)
+    HE.keyGen()
+    
+    PyfhelUtils.saveHE('HE_context_and_keys', HE)
+
+    return HE
+
 def run_job(service):
+    search_result = get_hashes(service)
+    
+    HE = __getHEContext()
+
+    operation = prepare_operation(HE, search_result)
+    FileIO.savePickle('fileA.pickle', operation)
+    print("Please run processor with input file=fileA.pickle and output file=fileB.pickle")
+    print("Then press ENTER")
+    tmp = input()
+
+    res = FileIO.loadPickle('fileB.pickle')
+    result_logs = decrypt_result(HE, res)
+    print('result_logs', result_logs)
+    
+    send_result_hashes(service, result_logs)
+
+def get_hashes(service):
     job = service.jobs.create(search,**create_dict)
 
     while True:
@@ -49,17 +97,37 @@ def run_job(service):
     search_result = results.JSONResultsReader(rr1)
     job.cancel()
 
+    return search_result
+
+def prepare_operation(HE, search_result):
+    hashes_to_check = []
+    for result in search_result:
+        hashes_to_check += [
+            result['hash']
+        ]
+    
+    hashes_to_check_short = __shorten_hashes(hashes_to_check)
+    malicious_hashes_short = __shorten_hashes(malicious_hashes)
+    
+    operation = FindMaliciousHashesOperation(
+        hashes_to_check,
+        malicious_hashes_short
+    )
+    operation.encrypt(HE)
+
+    return operation
+
+def decrypt_result(HE, res):
+    res.decrypt(HE)
+    return res.toLogs()
+
+def send_result_hashes(service, result_logs):
     index = service.indexes["result_hashes"]
     i=0
-    for result in search_result:
+    for result in result_logs:
         i += 1
         print(result)
-        if result['hash'] in malicious_hashes:
-            lastevent = "hash: {} is malicious?: True".format(result['hash'])
-        else:
-            lastevent = "hash: {} is malicious?: False".format(result['hash'])
-
-        index.submit(lastevent + "\n", sourcetype="hash-check")
+        index.submit(result, sourcetype="hash-check")
     print(i)
 
 
