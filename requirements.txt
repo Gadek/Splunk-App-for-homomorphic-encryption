@@ -1,3 +1,5 @@
 pyfhel
 numpy
 splunklib
+splunk-sdk
+python-dotenv
