@@ -33,7 +33,7 @@ with open("malicious hashes.txt") as f:
 #     "offset", "count", "search", "field_list", "f", "output_mode"
 # ]
 
-search='search index=hashes | head 2'
+search='search index=hashes | head 5'
 create_dict = dict()
 create_dict['rf'] = "hash"
 create_dict['earliest_time'] = "-1m"
@@ -47,7 +47,7 @@ def __shorten_hashes(hashes):
 
     for h in hashes:
         short_hashes += [
-            h[:15]
+            h[:14]
         ]
     
     return short_hashes
@@ -78,7 +78,6 @@ def run_job(service):
 
     res = FileIO.loadPickle('fileB.pickle')
     result_logs = decrypt_result(HE, res)
-    print('result_logs', result_logs)
     
     send_result_hashes(service, result_logs)
 
@@ -102,6 +101,7 @@ def get_hashes(service):
 def prepare_operation(HE, search_result):
     hashes_to_check = []
     for result in search_result:
+        print("search res:", result)
         hashes_to_check += [
             result['hash']
         ]
