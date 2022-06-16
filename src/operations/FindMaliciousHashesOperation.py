@@ -27,6 +27,17 @@ class FindMaliciousHashesResult(OperationResult):
         
         self.result = decryptedResult
 
+    def toLogs(self):
+        ret = []
+
+        for hash in self.result:
+            comparison = self.result[hash]
+            ret += [
+                'hash: {} is malicious?: {}\n'.format(hash, str(comparison))
+            ]
+        
+        return ret
+
     def __str__(self):
         ret = ''
 
