@@ -13,7 +13,7 @@ def hash2number(hash: str) -> int:
     return int(hash, 16)
 
 def number2hash(number: int) -> str:
-    return hex(number)
+    return hex(number)[2:]
 
 def splitNumberInto15bits(number: int):
     ret = []
