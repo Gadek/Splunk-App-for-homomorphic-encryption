@@ -1,2 +1,3 @@
 pyfhel
 numpy
+splunklib
