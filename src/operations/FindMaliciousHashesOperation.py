@@ -14,7 +14,7 @@ class FindMaliciousHashesResult(OperationResult):
         for encryptedHash in self.result:
             encryptedComparison = self.result[encryptedHash]
 
-            decryptedHash = Utils.number2string(
+            decryptedHash = Utils.number2hash(
                 Utils.getNumberFromSplittedInto15bits(
                     HE.decrypt(encryptedHash)
                 )
@@ -47,14 +47,14 @@ class FindMaliciousHashesOperation(Operation):
         for i in range(len(self.hashes)):
             self.hashes[i] = HE.encrypt(
                 Utils.splitNumberInto15bits(
-                    Utils.string2number(self.hashes[i])
+                    Utils.hash2number(self.hashes[i])
                 )
             )
         
         for i in range(len(self.malicious)):
             self.malicious[i] = HE.encrypt(
                 Utils.splitNumberInto15bits(
-                    Utils.string2number(self.malicious[i])
+                    Utils.hash2number(self.malicious[i])
                 )
             )
 

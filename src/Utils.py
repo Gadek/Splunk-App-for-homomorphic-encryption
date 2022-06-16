@@ -9,6 +9,12 @@ def number2string(number: int) -> str:
     bytes = number.to_bytes((number.bit_length() + 7) // 8, 'little')
     return bytes.decode('utf-8')
 
+def hash2number(hash: str) -> int:
+    return int(hash, 16)
+
+def number2hash(number: int) -> str:
+    return hex(number)
+
 def splitNumberInto15bits(number: int):
     ret = []
 
