@@ -13,6 +13,9 @@ def hash2number(hash: str) -> int:
     return int(hash, 16)
 
 def number2hash(number: int) -> str:
+    print("number2hash()", "got:", number, "hex:", hex(number), "aaa:", hex(number)[2:])
+    if hex(number)[0] == '-':
+        return hex(number)[3:]
     return hex(number)[2:]
 
 def splitNumberInto15bits(number: int):
