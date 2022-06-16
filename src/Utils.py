@@ -10,6 +10,7 @@ def number2string(number: int) -> str:
     return bytes.decode('utf-8')
 
 def hash2number(hash: str) -> int:
+    print("hash2number()", "hash:", hash, "num:", int(hash, 16))
     return int(hash, 16)
 
 def number2hash(number: int) -> str:
