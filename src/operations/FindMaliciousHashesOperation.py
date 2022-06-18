@@ -9,18 +9,22 @@ class FindMaliciousHashesResult(OperationResult):
         self.result = result
     
     def decrypt(self, HE):
+        max_bits = Utils.getHEMaxBits(HE)
+
         decryptedResult = {}
 
         for encryptedHash in self.result:
             encryptedComparison = self.result[encryptedHash]
 
             decryptedHash = Utils.number2hash(
-                Utils.getNumberFromSplittedInto15bits(
-                    HE.decrypt(encryptedHash)
+                Utils.arrayIntoNumber(
+                    HE.decrypt(encryptedHash),
+                    max_bits
                 )
             )
-            decryptedComparison = Utils.getNumberFromSplittedInto15bits(
-                HE.decrypt(encryptedComparison)
+            decryptedComparison = Utils.arrayIntoNumber(
+                HE.decrypt(encryptedComparison),
+                max_bits
             )
 
             decryptedResult[decryptedHash] = (decryptedComparison == 0)
@@ -55,17 +59,21 @@ class FindMaliciousHashesOperation(Operation):
         self.malicious = malicious
 
     def encrypt(self, HE):
+        max_bits = Utils.getHEMaxBits(HE)
+        
         for i in range(len(self.hashes)):
             self.hashes[i] = HE.encrypt(
-                Utils.splitNumberInto15bits(
-                    Utils.hash2number(self.hashes[i])
+                Utils.numberIntoArray(
+                    Utils.hash2number(self.hashes[i]),
+                    max_bits
                 )
             )
         
         for i in range(len(self.malicious)):
             self.malicious[i] = HE.encrypt(
-                Utils.splitNumberInto15bits(
-                    Utils.hash2number(self.malicious[i])
+                Utils.numberIntoArray(
+                    Utils.hash2number(self.malicious[i]),
+                    max_bits
                 )
             )
 
@@ -77,7 +85,7 @@ class FindMaliciousHashesOperation(Operation):
 
             for t in self.malicious:
                 comparison *= (s - t)
-            
+
             ret[s] = comparison
         
         return FindMaliciousHashesResult(ret)

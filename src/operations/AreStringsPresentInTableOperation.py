@@ -9,18 +9,22 @@ class AreStringsPresentInTableOperationResult(OperationResult):
         self.result = result
     
     def decrypt(self, HE):
+        max_bits = Utils.getHEMaxBits(HE)
+        
         decryptedResult = {}
 
         for encryptedString in self.result:
             encryptedComparison = self.result[encryptedString]
 
             decryptedString = Utils.number2string(
-                Utils.getNumberFromSplittedInto15bits(
-                    HE.decrypt(encryptedString)
+                Utils.arrayIntoNumber(
+                    HE.decrypt(encryptedString),
+                    max_bits
                 )
             )
-            decryptedComparison = Utils.getNumberFromSplittedInto15bits(
-                HE.decrypt(encryptedComparison)
+            decryptedComparison = Utils.arrayIntoNumber(
+                HE.decrypt(encryptedComparison),
+                max_bits
             )
 
             decryptedResult[decryptedString] = (decryptedComparison == 0)
@@ -44,17 +48,21 @@ class AreStringsPresentInTableOperation(Operation):
         self.table = table
 
     def encrypt(self, HE):
+        max_bits = Utils.getHEMaxBits(HE)
+        
         for i in range(len(self.strings)):
             self.strings[i] = HE.encrypt(
-                Utils.splitNumberInto15bits(
-                    Utils.string2number(self.strings[i])
+                Utils.numberIntoArray(
+                    Utils.string2number(self.strings[i]),
+                    max_bits
                 )
             )
         
         for i in range(len(self.table)):
             self.table[i] = HE.encrypt(
-                Utils.splitNumberInto15bits(
-                    Utils.string2number(self.table[i])
+                Utils.numberIntoArray(
+                    Utils.string2number(self.table[i]),
+                    max_bits
                 )
             )
 
