@@ -32,8 +32,10 @@ General Options for both scripts
 
 1. Setup Splunk
     - add generated logs
-    - generated hashes add to index `hashes`
+    - generated hashes add to new index `hashes`
+    - create field extractor for hashes using regex `hostname: (?<hostname>.*) ip:(?<ip>.*) path:(?<file>.*) sha256:(?<hash>[0-9a-fA-F]{64})`
     - create index `result_hashes` for results
+    - (optional) create field exractor for result_hashes using regex `(?<=hash: )(?<hash>[0-9a-fA-F]{64}).*?: (?<is_malicious>(False|True))`
 
 1. Generate logs using above scripts
 
