@@ -13,11 +13,9 @@ def number2string(number: int) -> str:
     return bytes.decode('utf-8')
 
 def hash2number(hash: str) -> int:
-    # print("hash2number()", "hash:", hash, "num:", int(hash, 16))
     return int(hash, 16)
 
 def number2hash(number: int) -> str:
-    # print("number2hash()", "got:", number, "hex:", hex(number), "aaa:", hex(number)[2:])
     return hex(number)[2:]
 
 def getHEMaxBits(HE):
