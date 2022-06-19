@@ -47,7 +47,7 @@ def __shorten_hashes(hashes):
 
     for h in hashes:
         short_hashes += [
-            h[:14]
+            h[:]
         ]
     
     return short_hashes
@@ -58,7 +58,7 @@ def __getHEContext():
         return HE
 
     HE = Pyfhel()
-    HE.contextGen(scheme='bfv', n=2**15, t_bits=20)
+    HE.contextGen(scheme='bfv', n=2**15, t_bits=34)
     HE.keyGen()
     
     PyfhelUtils.saveHE('HE_context_and_keys', HE)
