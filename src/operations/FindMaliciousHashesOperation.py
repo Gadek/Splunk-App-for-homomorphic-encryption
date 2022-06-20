@@ -54,31 +54,43 @@ class FindMaliciousHashesResult(OperationResult):
         return ret
 
 class FindMaliciousHashesOperation(Operation):
-    def __init__(self, hashes = [], malicious =[]):
+    def __init__(self, hashes = []):
         self.hashes = hashes
-        self.malicious = malicious
+        self.malicious = None
+        self.max_bits = None
 
     def encrypt(self, HE):
-        max_bits = Utils.getHEMaxBits(HE)
+        self.max_bits = Utils.getHEMaxBits(HE)
         
         for i in range(len(self.hashes)):
             self.hashes[i] = HE.encrypt(
                 Utils.numberIntoArray(
                     Utils.hash2number(self.hashes[i]),
-                    max_bits
+                    self.max_bits
                 )
             )
+    
+    def __loadMaliciousHashes(self):
+        self.malicious = []
+
+        if self.max_bits is None:
+            print("Error: max_bits is not set!")
+            return
         
-        for i in range(len(self.malicious)):
-            self.malicious[i] = HE.encrypt(
-                Utils.numberIntoArray(
-                    Utils.hash2number(self.malicious[i]),
-                    max_bits
-                )
-            )
+        with open("malicious hashes.txt") as f:
+            for line in f:
+                self.malicious += [
+                    Utils.numberIntoArray(
+                        Utils.hash2number(line[:-1]),
+                        self.max_bits
+                    )
+                ]
 
     def run(self) -> FindMaliciousHashesResult:
         ret = {}
+
+        if self.malicious is None:
+            self.__loadMaliciousHashes()
 
         for s in self.hashes:
             comparison = 1

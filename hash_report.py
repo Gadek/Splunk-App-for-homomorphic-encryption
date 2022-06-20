@@ -13,13 +13,6 @@ from src.operations.AddNumbersOperation import AddNumbersOperation
 from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
 
-malicious_hashes = list()
-with open("malicious hashes.txt") as f:
-    for line in f:
-        malicious_hashes.append(line[:-1])
-
-#print(malicious_hashes)
-
 # FLAGS_CREATE = [
 #     "earliest_time", "latest_time", "now", "time_format",
 #     "exec_mode", "search_mode", "rt_blocking", "rt_queue_size",
@@ -100,19 +93,14 @@ def get_hashes(service):
 
 def prepare_operation(HE, search_result):
     hashes_to_check = []
+    
     for result in search_result:
         print("search res:", result)
         hashes_to_check += [
             result['hash']
         ]
     
-    hashes_to_check_short = __shorten_hashes(hashes_to_check)
-    malicious_hashes_short = __shorten_hashes(malicious_hashes)
-    
-    operation = FindMaliciousHashesOperation(
-        hashes_to_check,
-        malicious_hashes_short
-    )
+    operation = FindMaliciousHashesOperation(hashes_to_check)
     operation.encrypt(HE)
 
     return operation
