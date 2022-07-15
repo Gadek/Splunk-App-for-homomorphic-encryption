@@ -3,6 +3,7 @@ import splunklib.results as results
 from dotenv import load_dotenv
 import os
 from time import sleep
+import pickle
 
 from Pyfhel import Pyfhel
 
@@ -12,6 +13,8 @@ import src.PyfhelUtils as PyfhelUtils
 from src.operations.AddNumbersOperation import AddNumbersOperation
 from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
+
+from send_to_processor import process
 
 # FLAGS_CREATE = [
 #     "earliest_time", "latest_time", "now", "time_format",
@@ -64,12 +67,13 @@ def run_job(service):
     HE = __getHEContext()
 
     operation = prepare_operation(HE, search_result)
-    FileIO.savePickle('fileA.pickle', operation)
-    print("Please run processor with input file=fileA.pickle and output file=fileB.pickle")
-    print("Then press ENTER")
-    tmp = input()
+    res = process(pickle.dumps(operation))
+    # FileIO.savePickle('fileA.pickle', operation)
+    # print("Please run processor with input file=fileA.pickle and output file=fileB.pickle")
+    # print("Then press ENTER")
+    # tmp = input()
 
-    res = FileIO.loadPickle('fileB.pickle')
+    # res = FileIO.loadPickle('fileB.pickle')
     result_logs = decrypt_result(HE, res)
     
     send_result_hashes(service, result_logs)

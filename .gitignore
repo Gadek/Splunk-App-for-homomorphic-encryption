@@ -3,3 +3,4 @@ __pycache__
 *.pickle
 HE_context_and_keys/*
 .env
+.venv
