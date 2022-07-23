@@ -69,12 +69,15 @@ def run_job(service):
     operation = prepare_operation(HE, search_result)
     received = process(pickle.dumps(operation))      # send prepared operation to processor
     res = pickle.loads(received)
+
+    ########## replaced with sockets #############
     # FileIO.savePickle('fileA.pickle', operation)
     # print("Please run processor with input file=fileA.pickle and output file=fileB.pickle")
     # print("Then press ENTER")
     # tmp = input()
 
     # res = FileIO.loadPickle('fileB.pickle')
+    ##############################################
     result_logs = decrypt_result(HE, res)
     
     send_result_hashes(service, result_logs)

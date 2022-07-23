@@ -7,6 +7,10 @@ PROCESSOR_ADDR = "127.0.0.1"
 PROCESSOR_PORT = 65432
 
 def process(msg):
+    '''
+    Send data to processor
+    TODO: change the location of this function - it is related to hash_report operations not socket_utils
+    '''
     load_dotenv()
 
     host = os.getenv('PROCESSOR_ADDR')
@@ -19,7 +23,6 @@ def process(msg):
 
         data = recv_msg(s)
         print(f"Received data")
-
 
     return data
 
@@ -40,7 +43,6 @@ def recv_msg(sock):
     return recvall(sock, msglen)
 
 def recvall(sock, n):
-    # breakpoint()
     # Helper function to recv n bytes or return None if EOF is hit
     data = bytearray()
     while len(data) < n:
