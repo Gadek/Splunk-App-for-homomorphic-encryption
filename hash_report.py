@@ -14,7 +14,7 @@ from src.operations.AddNumbersOperation import AddNumbersOperation
 from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
 
-from send_to_processor import process
+from socket_utils import process
 
 # FLAGS_CREATE = [
 #     "earliest_time", "latest_time", "now", "time_format",
@@ -67,7 +67,8 @@ def run_job(service):
     HE = __getHEContext()
 
     operation = prepare_operation(HE, search_result)
-    res = process(pickle.dumps(operation))
+    received = process(pickle.dumps(operation))      # send prepared operation to processor
+    res = pickle.loads(received)
     # FileIO.savePickle('fileA.pickle', operation)
     # print("Please run processor with input file=fileA.pickle and output file=fileB.pickle")
     # print("Then press ENTER")

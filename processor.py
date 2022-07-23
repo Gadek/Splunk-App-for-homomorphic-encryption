@@ -1,14 +1,23 @@
 import numpy as np
 from Pyfhel import Pyfhel
 import sys
+import os
 import socket
 import src.FileIO as FileIO
 import pickle
+from socket_utils import send_msg, recv_msg
+from dotenv import load_dotenv
 
-# definitions for sockets API
-HOST = "127.0.0.1"
-PORT = 65432
+# # definitions for sockets API
+# HOST = "127.0.0.1"
+# PORT = 65432
 
+load_dotenv()
+
+HOST = os.getenv('PROCESSOR_ADDR')
+PORT = os.getenv('PROCESSOR_PORT')
+
+MAXDATA = 10000
 
 ########## replace with sockets #############
 # if len(sys.argv) <= 2:
@@ -23,7 +32,7 @@ PORT = 65432
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind((HOST, PORT))
+    s.bind((HOST, int(PORT)))
     s.listen()
     print("Listenning for connection...")
     conn, addr = s.accept()
@@ -31,7 +40,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     with conn:
         print(f"Connection from: {addr}")
         while True:
-            operation = pickle.loads(conn.recv(1024))
+            received = recv_msg(conn)
+            operation = pickle.loads(received)
+            print("Received data")
+            print("Running operation...")
             result = operation.run()
+            print("Operation successfull. Sending back the results.")
+            send_msg(conn, pickle.dumps(result))
 
             #FileIO.savePickle(outputFilePath, result)
