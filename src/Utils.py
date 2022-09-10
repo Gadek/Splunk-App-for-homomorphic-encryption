@@ -1,3 +1,4 @@
+import copy
 import math
 import numpy as np
 
@@ -38,5 +39,100 @@ def arrayIntoNumber(arr, max_bits):
     for s in arr:
         ret <<= max_bits
         ret |= s
+    
+    return ret
+
+"""
+# def encryptedKeyInDict(encryptedKey, dict):
+#     for key in dict:
+#         dict[key] += 0 ** ((key - encryptedKey) ** 2)
+
+#     return dict
+
+def areCtxtsEqualDZIALAAAAA(a, b, encrypted_one, HE_t):
+    # pow
+    leftPowers = HE_t - 1
+
+    currentPower = 0
+    xs = {
+        1: (a - b)
+    }
+
+    leftPowers -= 1
+    currentPower += 1
+
+    ret = copy.copy(xs[1])
+
+    while leftPowers > 0:
+        iterPower = 1
+
+        for tmpPower in sorted(xs.keys(), reverse=True):
+            if leftPowers >= tmpPower:
+                iterPower = tmpPower
+                break
+
+        ret *= xs[iterPower]
+        ret = ~ret
+
+        leftPowers -= iterPower
+        currentPower += iterPower
+
+        # add new x to xs
+        xs[currentPower] = copy.copy(ret)
+
+    # pow end
+    ret = -ret + encrypted_one
+
+    return ret
+"""
+
+def pow(x, n):
+    leftPowers = n
+
+    currentPower = 0
+    xs = {
+        1: copy.copy(x)
+    }
+
+    leftPowers -= 1
+    currentPower += 1
+
+    ret = copy.copy(xs[1])
+
+    while leftPowers > 0:
+        iterPower = 1
+
+        for tmpPower in sorted(xs.keys(), reverse=True):
+            if leftPowers >= tmpPower:
+                iterPower = tmpPower
+                break
+
+        ret *= xs[iterPower]
+        ret = ~ret
+
+        leftPowers -= iterPower
+        currentPower += iterPower
+
+        # add new x to xs
+        xs[currentPower] = copy.copy(ret)
+    
+    return ret
+
+def areCtxtsEqual(a, b, encrypted_one, HE_t):
+    ret = pow(a - b, HE_t - 1)
+    ret = -ret + encrypted_one
+
+    return ret
+
+def sumVector(v, slots):
+    ret = copy.copy(v)
+    a = copy.copy(v)
+
+    print(slots)
+    for i in range(slots - 1):
+        if i % 10 == 0:
+            print(i)
+        a >>= 1
+        ret += a
     
     return ret
