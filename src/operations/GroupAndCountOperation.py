@@ -4,7 +4,6 @@ import numpy as np
 
 from src.operations.Operation import Operation, OperationResult
 import src.Utils as Utils
-import sys
 
 class GroupAndCountResult(OperationResult):
     def __init__(self, result):
@@ -56,9 +55,6 @@ class GroupAndCountResult(OperationResult):
 class GroupAndCountOperation(Operation):
     def __init__(self, data = []):
         self.data = data
-        # TODO: convert string to int?
-        # self.data[i] = Utils.string2number(self.data[i])
-
         self.__validateData()
     
     def __validateData(self):
