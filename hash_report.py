@@ -38,16 +38,6 @@ results_dict['count'] = 0
 results_dict['output_mode'] = "json"
 results_dict['field_list'] = "_raw hash"
 
-def __shorten_hashes(hashes):
-    short_hashes = []
-
-    for h in hashes:
-        short_hashes += [
-            h[:]
-        ]
-    
-    return short_hashes
-
 def __getHEContext():
     if os.path.exists('HE_context_and_keys'):
         HE = PyfhelUtils.loadHE('HE_context_and_keys')
