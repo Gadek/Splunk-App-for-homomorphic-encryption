@@ -1,3 +1,4 @@
+import sys
 import splunklib.client as client
 import splunklib.results as results
 from dotenv import load_dotenv
@@ -11,7 +12,7 @@ import src.FileIO as FileIO
 import src.PyfhelUtils as PyfhelUtils
 
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
-from operations.IpGroupAndCountOperation import IpGroupAndCountOperation
+from src.operations.IpGroupAndCountOperation import IpGroupAndCountOperation
 
 from socket_utils import process
 
@@ -177,6 +178,20 @@ class IpReport(Report):
         return operation
 
 def main():
+    if len(sys.argv) <= 1:
+        print(f"Usage: {sys.argv[0]} [reportType]")
+        sys.exit(1)
+
+    reportType = sys.argv[1]
+
+    if reportType == "hash":
+        report = HashReport()
+    elif reportType == "ip":
+        report = IpReport()
+    else:
+        print(f"Incorrect report type. Allowed: hash, ip")
+        sys.exit(1)
+    
     load_dotenv()
 
     host = os.getenv('host')
@@ -186,10 +201,8 @@ def main():
 
     service = client.connect(host=host, port=port, username=username, password=password)
     assert isinstance(service, client.Service)
-
-    # TODO: instanciate different report class based on argv
-    hashReport = HashReport()
-    hashReport.generate(service)
+    
+    report.generate(service)
 
 if __name__ == "__main__":
     main()
