@@ -10,9 +10,8 @@ from Pyfhel import Pyfhel
 import src.FileIO as FileIO
 import src.PyfhelUtils as PyfhelUtils
 
-from src.operations.AddNumbersOperation import AddNumbersOperation
-from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
+from operations.IpGroupAndCountOperation import IpGroupAndCountOperation
 
 from socket_utils import process
 
@@ -34,6 +33,9 @@ class Report:
         self.search=''
         self.create_dict = dict()
         self.results_dict = dict()
+
+        self.result_index = ''
+        self.sourcetype = ''
     
     def generate(self, service):
         search_result = self._perform_search(service)
@@ -72,7 +74,7 @@ class Report:
 
         return search_result
     
-    def _getHEContext(self): # TODO: for different params just override the method
+    def _getHEContext(self):
         if os.path.exists('HE_context_and_keys_basic'):
             HE = PyfhelUtils.loadHE('HE_context_and_keys_basic')
             return HE
@@ -93,12 +95,12 @@ class Report:
         return res.toLogs()
     
     def _send_result(self, service, resultLogs):
-        index = service.indexes["result_hashes"]
+        index = service.indexes[self.result_index]
         i=0
         for result in resultLogs:
             i += 1
             print(result)
-            index.submit(result, sourcetype="hash-check")
+            index.submit(result, sourcetype=self.sourcetype)
         print(i)
 
 class HashReport(Report):
@@ -113,6 +115,9 @@ class HashReport(Report):
         self.results_dict['count'] = 0
         self.results_dict['output_mode'] = "json"
         self.results_dict['field_list'] = "_raw hash"
+
+        self.result_index = "result_hashes"
+        self.sourcetype = 'hash-check'
     
     def _prepare_operation(self, HE, search_result):
         hashes_to_check = []
@@ -124,6 +129,49 @@ class HashReport(Report):
             ]
         
         operation = FindMaliciousHashesOperation(hashes_to_check)
+        operation.encrypt(HE)
+
+        return operation
+
+class IpReport(Report):
+    def __init__(self):
+        self.search='search index=ips | head 5'
+        
+        self.create_dict = dict()
+        self.create_dict['rf'] = "ip"
+        self.create_dict['earliest_time'] = "-1m"
+        
+        self.results_dict = dict()
+        self.results_dict['count'] = 0
+        self.results_dict['output_mode'] = "json"
+        self.results_dict['field_list'] = "_raw ip"
+
+        self.result_index = "result_ips"
+        self.sourcetype = 'ip-check'
+    
+    def _getHEContext(self):
+        if os.path.exists('HE_context_and_keys_counting_and_groupping'):
+            HE = PyfhelUtils.loadHE('HE_context_and_keys_counting_and_groupping')
+            return HE
+
+        HE = Pyfhel()
+        HE.contextGen(scheme='bfv', n=2**15, t_bits=17)
+        HE.keyGen()
+        
+        PyfhelUtils.saveHE('HE_context_and_keys_counting_and_groupping', HE)
+
+        return HE
+    
+    def _prepare_operation(self, HE, search_result):
+        ips_to_count = []
+        
+        for result in search_result:
+            print("ip search res:", result)
+            ips_to_count += [
+                result['ip']
+            ]
+        
+        operation = IpGroupAndCountOperation(ips_to_count)
         operation.encrypt(HE)
 
         return operation
