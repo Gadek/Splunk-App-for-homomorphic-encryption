@@ -30,15 +30,14 @@ from socket_utils import process
 # ]
 
 class Report:
-    def __init__(self):
-        self.search=''
-        self.create_dict = dict()
-        self.results_dict = dict()
-
+    def __init__(self, timeFrom, timeTo):
+        self.source_index = ''
         self.result_index = ''
+        self.earliest_time = timeFrom
+        self.latest_time = timeTo
         self.sourcetype = ''
     
-    def generate(self, service):
+    def generate(self, service):    
         search_result = self._perform_search(service)
         HE = self._getHEContext()
         operation = self._prepare_operation(HE, search_result)
@@ -59,7 +58,17 @@ class Report:
         self._send_result(service, resultLogs)
     
     def _perform_search(self, service):
-        job = service.jobs.create(self.search, **self.create_dict)
+        search = 'search index=' + self.source_index + ' | head 5'
+        create_dict = dict()
+        create_dict['rf'] = "hash"
+        create_dict['earliest_time'] = self.earliest_time
+        create_dict['latest_time'] = self.latest_time
+        results_dict = dict()
+        results_dict['count'] = 0
+        results_dict['output_mode'] = "json"
+        results_dict['field_list'] = "_raw hash"
+
+        job = service.jobs.create(search, **create_dict)
 
         while True:
             while not job.is_ready():
@@ -68,7 +77,7 @@ class Report:
                 break
             sleep(2)
 
-        rr1 = job.results(**self.results_dict)
+        rr1 = job.results(**results_dict)
         # print(rr1)
         search_result = results.JSONResultsReader(rr1)
         job.cancel()
@@ -105,19 +114,10 @@ class Report:
         print(i)
 
 class HashReport(Report):
-    def __init__(self):
-        self.search='search index=hashes | head 5'
-        
-        self.create_dict = dict()
-        self.create_dict['rf'] = "hash"
-        self.create_dict['earliest_time'] = "-1m"
-        
-        self.results_dict = dict()
-        self.results_dict['count'] = 0
-        self.results_dict['output_mode'] = "json"
-        self.results_dict['field_list'] = "_raw hash"
-
-        self.result_index = "result_hashes"
+    def __init__(self, timeFrom, timeTo):
+        super().__init__(timeFrom, timeTo)
+        self.source_index = 'hashes'
+        self.result_index = 'result_hashes'
         self.sourcetype = 'hash-check'
     
     def _prepare_operation(self, HE, search_result):
@@ -135,19 +135,10 @@ class HashReport(Report):
         return operation
 
 class IpReport(Report):
-    def __init__(self):
-        self.search='search index=ips | head 5'
-        
-        self.create_dict = dict()
-        self.create_dict['rf'] = "ip"
-        self.create_dict['earliest_time'] = "-1m"
-        
-        self.results_dict = dict()
-        self.results_dict['count'] = 0
-        self.results_dict['output_mode'] = "json"
-        self.results_dict['field_list'] = "_raw ip"
-
-        self.result_index = "result_ips"
+    def __init__(self, timeFrom, timeTo):
+        super().__init__(timeFrom, timeTo)
+        self.source_index = 'ips'
+        self.result_index = 'result_ips'
         self.sourcetype = 'ip-check'
     
     def _getHEContext(self):
@@ -178,16 +169,18 @@ class IpReport(Report):
         return operation
 
 def main():
-    if len(sys.argv) <= 1:
-        print(f"Usage: {sys.argv[0]} [reportType]")
+    if len(sys.argv) <= 3:
+        print(f"Usage: {sys.argv[0]} [reportType] [timeFrom] [timeTo]")
         sys.exit(1)
 
     reportType = sys.argv[1]
+    timeFrom = sys.argv[2]
+    timeTo = sys.argv[3]
 
     if reportType == "hash":
-        report = HashReport()
+        report = HashReport(timeFrom, timeTo)
     elif reportType == "ip":
-        report = IpReport()
+        report = IpReport(timeFrom, timeTo)
     else:
         print(f"Incorrect report type. Allowed: hash, ip")
         sys.exit(1)
@@ -196,10 +189,9 @@ def main():
 
     host = os.getenv('host')
     port = os.getenv('port')
-    username = os.getenv('username')
-    password = os.getenv('password')
+    token = os.getenv('token')
 
-    service = client.connect(host=host, port=port, username=username, password=password)
+    service = client.connect(host=host, port=port, token=token)
     assert isinstance(service, client.Service)
     
     report.generate(service)
