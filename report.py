@@ -189,8 +189,11 @@ def main():
 
     host = os.getenv('host')
     port = os.getenv('port')
+    # username = os.getenv('username')
+    # password = os.getenv('password')
     token = os.getenv('token')
 
+    # service = client.connect(host=host, port=port, username=username, password=password)
     service = client.connect(host=host, port=port, token=token)
     assert isinstance(service, client.Service)
     
