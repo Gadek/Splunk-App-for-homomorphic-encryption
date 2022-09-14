@@ -1,0 +1,5 @@
+windows-server1
+oracle-server1
+database-server
+ubuntu-workstation
+mint-workstation
