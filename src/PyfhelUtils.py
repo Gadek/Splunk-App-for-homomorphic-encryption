@@ -6,7 +6,7 @@ def saveHE(path, HE, withRelinKey = False, withRotateKey = False):
         print("saveHE: dir already exists!")
         return False
     
-    os.mkdir(path)
+    os.makedirs(path, exist_ok=True)
 
     HE.save_context(path + "/context")
     HE.save_public_key(path + "/pub.key")

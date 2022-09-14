@@ -76,15 +76,15 @@ class Report:
         return search_result
     
     def _getHEContext(self):
-        if os.path.exists('HE_context_and_keys_basic'):
-            HE = PyfhelUtils.loadHE('HE_context_and_keys_basic')
+        if os.path.exists('HE_context_and_keys/basic'):
+            HE = PyfhelUtils.loadHE('HE_context_and_keys/basic')
             return HE
 
         HE = Pyfhel()
         HE.contextGen(scheme='bfv', n=2**15, t_bits=34)
         HE.keyGen()
         
-        PyfhelUtils.saveHE('HE_context_and_keys_basic', HE)
+        PyfhelUtils.saveHE('HE_context_and_keys/basic', HE)
 
         return HE
     
@@ -151,15 +151,15 @@ class IpReport(Report):
         self.sourcetype = 'ip-check'
     
     def _getHEContext(self):
-        if os.path.exists('HE_context_and_keys_counting_and_groupping'):
-            HE = PyfhelUtils.loadHE('HE_context_and_keys_counting_and_groupping')
+        if os.path.exists('HE_context_and_keys/counting_and_groupping'):
+            HE = PyfhelUtils.loadHE('HE_context_and_keys/counting_and_groupping')
             return HE
 
         HE = Pyfhel()
         HE.contextGen(scheme='bfv', n=2**15, t_bits=17)
         HE.keyGen()
         
-        PyfhelUtils.saveHE('HE_context_and_keys_counting_and_groupping', HE)
+        PyfhelUtils.saveHE('HE_context_and_keys/counting_and_groupping', HE)
 
         return HE
     
