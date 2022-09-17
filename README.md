@@ -1,25 +1,21 @@
 # Splunk-App-for-homomorphic-encryption
 
-## Logs generators
+## Logs generator
 
-1. ```esxi_log_generator.py```
+1. ```logs_generator.py```
 
-    This script generates logs which imitate failed login attempts to VMware ESXi. 
-
-    `Usage: python3 esxi_logs_generator.py [OPTIONS...]`
-
-1. ```hashes_generator.py```
-
-    This script generates logs which imitate transfer of files with their hashes. 
-
-    `Usage: python3 hashes_generator.py [OPTIONS...]`
 
 General Options for both scripts
 ```
--h, --help           Prints a short help text and exists
--d, --days <value>   Set number of days in past to generate logs. Default 0
--f, --file <path>    Set log file. Default /var/log/esxi.log
--s, --stop           Don't generate logs continuously
+This script generates logs regarding either: hashes of various example files or authentication attempts. \n\n\
+    Usage: python3 logs_generator.py [OPTIONS...] \n\
+    
+    General Options \n\
+    -h, --help           Prints a short help text and exists\n\
+    --auth               Generate logs regarding authentication attempts. Default are hashes\n\
+    -d, --days <value>   Set number of days in past to generate logs. Default 0\n\
+    -f, --file <path>    Set log file. Default /var/log/hashes.log \n\
+    -s, --stop           Don't generate logs continuously
 ```
 
 # Running
