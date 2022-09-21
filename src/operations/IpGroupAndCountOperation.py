@@ -34,6 +34,11 @@ class IpGroupAndCountResult(GroupAndCountResult):
             parts += [str(i & 0xff)]
             i >>= 8
         
+        if len(parts) == 0:
+            parts = [str(0), str(0)]
+        elif len(parts) == 1:
+            parts += [str(0)]
+        
         return '.'.join(reversed(parts))
 
 class IpGroupAndCountOperation(GroupAndCountOperation):
