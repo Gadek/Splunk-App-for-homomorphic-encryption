@@ -37,7 +37,7 @@ class FindMaliciousHashesResult(OperationResult):
         for hash in self.result:
             comparison = self.result[hash]
             ret += [
-                'hash: {} is malicious?: {}\n'.format(hash, str(comparison))
+                '{},{}\n'.format(hash, str(comparison))
             ]
         
         return ret

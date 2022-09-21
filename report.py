@@ -30,7 +30,7 @@ from socket_utils import process
 # ]
 
 class Report:
-    def __init__(self, timeFrom, timeTo):
+    def __init__(self, timeFrom, timeTo, sourceIndex):
         self.source_index = ''
         self.result_index = ''
         self.earliest_time = timeFrom
@@ -55,10 +55,11 @@ class Report:
         ##############################################
 
         resultLogs = self._decrypt_result(HE, res)
-        self._send_result(service, resultLogs)
+        if len(resultLogs)>0:
+            self._send_result(service, resultLogs)
     
     def _perform_search(self, service):
-        search = 'search index=' + self.source_index + ' | head 5'
+        search = 'search index=' + self.source_index + '|dedup hash | where isNull(malicious)'
         create_dict = dict()
         create_dict['rf'] = "hash"
         create_dict['earliest_time'] = self.earliest_time
@@ -105,26 +106,31 @@ class Report:
         return res.toLogs()
     
     def _send_result(self, service, resultLogs):
-        index = service.indexes[self.result_index]
-        i=0
+        print("_raw,hash,malicious")
         for result in resultLogs:
-            i += 1
-            print(result)
-            index.submit(result, sourcetype=self.sourcetype)
-        print(i)
+            print(result.split(',')[0],result.split(',')[1][:-1],",",result[:-1])
+        search = '| makeresults format=csv data="hash,malicious\n' + "".join(resultLogs) +'" | outputlookup append=True hashes'
+
+        job = service.jobs.create(search)
+
+        while True:
+            while not job.is_ready():
+                pass
+            if job['isDone'] == '1':
+                break
+            sleep(2)
 
 class HashReport(Report):
-    def __init__(self, timeFrom, timeTo):
-        super().__init__(timeFrom, timeTo)
-        self.source_index = 'hashes'
-        self.result_index = 'result_hashes'
-        self.sourcetype = 'hash-check'
+    def __init__(self, timeFrom, timeTo, sourceIndex):
+        super().__init__(timeFrom, timeTo, sourceIndex)
+        self.source_index = sourceIndex
+
     
     def _prepare_operation(self, HE, search_result):
         hashes_to_check = []
         
         for result in search_result:
-            print("search res:", result)
+            #print("search result:", result['_raw'])
             hashes_to_check += [
                 result['hash']
             ]
@@ -135,9 +141,9 @@ class HashReport(Report):
         return operation
 
 class IpReport(Report):
-    def __init__(self, timeFrom, timeTo):
-        super().__init__(timeFrom, timeTo)
-        self.source_index = 'ips'
+    def __init__(self, timeFrom, timeTo, sourceIndex):
+        super().__init__(timeFrom, timeTo, sourceIndex)
+        self.source_index = sourceIndex
         self.result_index = 'result_ips'
         self.sourcetype = 'ip-check'
     
@@ -169,18 +175,19 @@ class IpReport(Report):
         return operation
 
 def main():
-    if len(sys.argv) <= 3:
-        print(f"Usage: {sys.argv[0]} [reportType] [timeFrom] [timeTo]")
+    if len(sys.argv) <= 4:
+        print(f"Usage: {sys.argv[0]} [reportType] [timeFrom] [timeTo] [sourceIndex]")
         sys.exit(1)
 
     reportType = sys.argv[1]
     timeFrom = sys.argv[2]
     timeTo = sys.argv[3]
+    sourceIndex = sys.argv[4]
 
     if reportType == "hash":
-        report = HashReport(timeFrom, timeTo)
+        report = HashReport(timeFrom, timeTo, sourceIndex)
     elif reportType == "ip":
-        report = IpReport(timeFrom, timeTo)
+        report = IpReport(timeFrom, timeTo, sourceIndex)
     else:
         print(f"Incorrect report type. Allowed: hash, ip")
         sys.exit(1)

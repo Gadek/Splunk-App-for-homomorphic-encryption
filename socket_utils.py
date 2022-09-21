@@ -17,18 +17,23 @@ def process(msg):
     port = os.getenv('PROCESSOR_PORT')
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((PROCESSOR_ADDR, PROCESSOR_PORT))
+        try:
+            s.connect((PROCESSOR_ADDR, PROCESSOR_PORT))
+        except:
+            print("ERROR")
+            print("Couldn't connect to remote processor")
+            exit()
         send_msg(s, msg)
-        print("Data sent.")
+        #print("Data sent.")
 
         data = recv_msg(s)
-        print(f"Received data")
+        #print(f"Received data")
 
     return data
 
 def send_msg(sock, msg):
     # Prefix each message with a 4-byte length (network byte order)
-    print(f"length: {len(msg)}")
+    #print(f"length: {len(msg)}")
     msg = struct.pack('>I', len(msg)) + msg
     sock.sendall(msg)
 
@@ -39,7 +44,7 @@ def recv_msg(sock):
         return None
     msglen = struct.unpack('>I', raw_msglen)[0]
     # Read the message data
-    print(f"length: {msglen}")
+    #print(f"length: {msglen}")
     return recvall(sock, msglen)
 
 def recvall(sock, n):

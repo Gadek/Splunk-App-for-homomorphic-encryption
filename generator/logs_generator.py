@@ -104,10 +104,10 @@ sha256_list = list()
 with open("sha256_list.txt") as f:
     [sha256_list.append((line.split()[0], line.split()[1])) for line in f.readlines()]
 
-ip_weights = random.sample(range(10, 30), len(ip_list))
-user_weights = random.sample(range(10, 30), len(user_list))
-host_weights = random.sample(range(10, 30), len(host_list))
-sha256_weights = random.sample(range(10, 30), len(sha256_list))
+ip_weights = random.sample(range(10, len(ip_list)+10), len(ip_list))
+user_weights = random.sample(range(10, len(user_list)+10), len(user_list))
+host_weights = random.sample(range(10, len(host_list)+10), len(host_list))
+sha256_weights = random.sample(range(10, len(sha256_list)+10), len(sha256_list))
 
 if generate_hashes:
     for i in reversed(range(86400*days)):
