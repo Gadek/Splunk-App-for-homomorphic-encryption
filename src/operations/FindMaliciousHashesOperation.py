@@ -132,10 +132,12 @@ class FindMaliciousHashesOperation(Operation):
         
         with open("malicious hashes.txt") as f:
             for line in f:
+                h = line.strip()
+
                 self.malicious += [
                     Utils.repeatNumber(
                         Utils.numberIntoArray(
-                            Utils.hash2number(line[:-1]),
+                            Utils.hash2number(h),
                             self.max_bits
                         ),
                         self.max_bits,
