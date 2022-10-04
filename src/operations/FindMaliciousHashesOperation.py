@@ -47,11 +47,9 @@ class FindMaliciousHashesResult(OperationResult):
             comparisonsDecoded = []
 
             for comp in comparisonsEncoded:
-                tmp_comp = Utils.number2hash(
-                    Utils.arrayIntoNumber(
-                        comp,
-                        max_bits
-                    )
+                tmp_comp = Utils.arrayIntoNumber(
+                    comp,
+                    max_bits
                 )
 
                 comparisonsDecoded += [tmp_comp]
@@ -64,7 +62,7 @@ class FindMaliciousHashesResult(OperationResult):
                 h = hashesDecoded[i]
                 c = comparisonsDecoded[i]
 
-                decryptedResult[h] = (c == 0 or c == '0')
+                decryptedResult[h] = (c == 0)
         
         self.result = decryptedResult
 
