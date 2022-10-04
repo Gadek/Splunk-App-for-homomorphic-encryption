@@ -92,3 +92,63 @@ def sumVector(v, slots):
         ret += a
     
     return ret
+
+"""
+Each number in numbers array is an number_array (array with elements in modulus range)
+"""
+def batchNumbers(numbers, HE, numberBits = 256):
+    max_bits = getHEMaxBits(HE)
+    number_slots = math.ceil(numberBits / max_bits)
+
+    batched_numbers = []
+
+    for number_array in numbers:
+        for number_part in number_array:
+            batched_numbers += [number_part]
+        for i in range(number_slots - len(number_array)):
+            batched_numbers += [0]
+
+    return splitNumbersToArraysWithMaxNLength(batched_numbers, HE.n)
+
+def numbersFromBatch(batchedNumbers, HE, numberBits = 256):
+    max_bits = getHEMaxBits(HE)
+    number_slots = math.ceil(numberBits / max_bits)
+
+    numbers = []
+
+    while len(batchedNumbers) > number_slots:
+        numbers += [batchedNumbers[:number_slots]]
+        batchedNumbers = batchedNumbers[number_slots:]
+    
+    return numbers
+
+"""
+number is a number converted to a number_array (array with elements in modulus range)
+"""
+def repeatNumber(number, max_bits, n, numberBits = 256, times = None):
+    number_slots = math.ceil(numberBits / max_bits)
+
+    batched_numbers = []
+
+    if times is None:
+        times = math.floor(n / number_slots)
+    
+    for i in range(times):
+        for number_part in number:
+            batched_numbers += [number_part]
+        for i in range(number_slots - len(number)):
+            batched_numbers += [0]
+
+    return splitNumbersToArraysWithMaxNLength(batched_numbers, n)[0]
+
+def splitNumbersToArraysWithMaxNLength(numbers, n):
+    numbers = [numbers]
+
+    while len(numbers[-1]) > n:
+        first = numbers[-1][:n]
+        second = numbers[-1][n:]
+
+        numbers[-1] = first
+        numbers += [second]
+    
+    return numbers
