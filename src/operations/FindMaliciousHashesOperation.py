@@ -5,11 +5,17 @@ import src.Utils as Utils
 import sys
 
 class FindMaliciousHashesResult(OperationResult):
-    def __init__(self, result):
+    def __init__(self, result, numberOfHashes):
         self.result = result
+        self.numberOfHashes = numberOfHashes
     
     def decrypt(self, HE):
         max_bits = Utils.getHEMaxBits(HE)
+        
+        numberOfHashes = Utils.arrayIntoNumber(
+            HE.decrypt(self.numberOfHashes),
+            max_bits
+        )
 
         decryptedResult = {}
 
@@ -50,12 +56,13 @@ class FindMaliciousHashesResult(OperationResult):
 
                 comparisonsDecoded += [tmp_comp]
 
-            for i in range(min(len(hashesDecoded), len(comparisonsDecoded))):
+            for i in range(min(
+                len(hashesDecoded),
+                len(comparisonsDecoded),
+                numberOfHashes
+            )):
                 h = hashesDecoded[i]
                 c = comparisonsDecoded[i]
-
-                if h == 0 or h == '0':
-                    continue
 
                 decryptedResult[h] = (c == 0 or c == '0')
         
@@ -93,6 +100,13 @@ class FindMaliciousHashesOperation(Operation):
         self.max_bits = Utils.getHEMaxBits(HE)
         self.n = HE.n
         self.one = HE.encrypt(1)
+
+        self.numberOfHashes = HE.encrypt(
+            Utils.numberIntoArray(
+                len(self.hashes),
+                self.max_bits
+            )
+        )
         
         for i in range(len(self.hashes)):
             self.hashes[i] = Utils.numberIntoArray(
@@ -146,4 +160,4 @@ class FindMaliciousHashesOperation(Operation):
 
             ret[s] = comparison
         
-        return FindMaliciousHashesResult(ret)
+        return FindMaliciousHashesResult(ret, self.numberOfHashes)
