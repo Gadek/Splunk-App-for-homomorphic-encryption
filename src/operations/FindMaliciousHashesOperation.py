@@ -5,29 +5,64 @@ import src.Utils as Utils
 import sys
 
 class FindMaliciousHashesResult(OperationResult):
-    def __init__(self, result):
+    def __init__(self, result, numberOfHashes):
         self.result = result
+        self.numberOfHashes = numberOfHashes
     
     def decrypt(self, HE):
         max_bits = Utils.getHEMaxBits(HE)
+        
+        numberOfHashes = Utils.arrayIntoNumber(
+            HE.decrypt(self.numberOfHashes),
+            max_bits
+        )
 
         decryptedResult = {}
 
-        for encryptedHash in self.result:
-            encryptedComparison = self.result[encryptedHash]
+        for encryptedBatchOfHashes in self.result:
+            hashesEncoded = Utils.numbersFromBatch(
+                HE.decrypt(encryptedBatchOfHashes),
+                HE
+            )
 
-            decryptedHash = Utils.number2hash(
-                Utils.arrayIntoNumber(
-                    HE.decrypt(encryptedHash),
+            hashesDecoded = []
+
+            for h in hashesEncoded:
+                tmp_hash = Utils.number2hash(
+                    Utils.arrayIntoNumber(
+                        h,
+                        max_bits
+                    )
+                )
+
+                hashesDecoded += [tmp_hash]
+            
+            # COMPARISONS
+            encryptedBatchOfComparisons = self.result[encryptedBatchOfHashes]
+            comparisonsEncoded = Utils.numbersFromBatch(
+                HE.decrypt(encryptedBatchOfComparisons),
+                HE
+            )
+            
+            comparisonsDecoded = []
+
+            for comp in comparisonsEncoded:
+                tmp_comp = Utils.arrayIntoNumber(
+                    comp,
                     max_bits
                 )
-            )
-            decryptedComparison = Utils.arrayIntoNumber(
-                HE.decrypt(encryptedComparison),
-                max_bits
-            )
 
-            decryptedResult[decryptedHash] = (decryptedComparison == 0)
+                comparisonsDecoded += [tmp_comp]
+
+            for i in range(min(
+                len(hashesDecoded),
+                len(comparisonsDecoded),
+                numberOfHashes
+            )):
+                h = hashesDecoded[i]
+                c = comparisonsDecoded[i]
+
+                decryptedResult[h] = (c == 0)
         
         self.result = decryptedResult
 
@@ -61,13 +96,27 @@ class FindMaliciousHashesOperation(Operation):
 
     def encrypt(self, HE):
         self.max_bits = Utils.getHEMaxBits(HE)
+        self.n = HE.n
+        self.one = HE.encrypt(1)
+
+        self.numberOfHashes = HE.encrypt(
+            Utils.numberIntoArray(
+                len(self.hashes),
+                self.max_bits
+            )
+        )
         
         for i in range(len(self.hashes)):
+            self.hashes[i] = Utils.numberIntoArray(
+                Utils.hash2number(self.hashes[i]),
+                self.max_bits
+            )
+        
+        self.hashes = Utils.batchNumbers(self.hashes, HE)
+
+        for i in range(len(self.hashes)):
             self.hashes[i] = HE.encrypt(
-                Utils.numberIntoArray(
-                    Utils.hash2number(self.hashes[i]),
-                    self.max_bits
-                )
+                self.hashes[i]
             )
     
     def __loadMaliciousHashes(self):
@@ -77,12 +126,22 @@ class FindMaliciousHashesOperation(Operation):
             print("Error: max_bits is not set!")
             return
         
+        if self.n is None:
+            print("Error: n is not set!")
+            return
+        
         with open("malicious hashes.txt") as f:
             for line in f:
+                h = line.strip()
+
                 self.malicious += [
-                    Utils.numberIntoArray(
-                        Utils.hash2number(line[:-1]),
-                        self.max_bits
+                    Utils.repeatNumber(
+                        Utils.numberIntoArray(
+                            Utils.hash2number(h),
+                            self.max_bits
+                        ),
+                        self.max_bits,
+                        self.n
                     )
                 ]
 
@@ -93,11 +152,12 @@ class FindMaliciousHashesOperation(Operation):
             self.__loadMaliciousHashes()
 
         for s in self.hashes:
-            comparison = 1
+            comparison = self.one
 
             for t in self.malicious:
                 comparison *= (s - t)
+                ~comparison
 
             ret[s] = comparison
         
-        return FindMaliciousHashesResult(ret)
+        return FindMaliciousHashesResult(ret, self.numberOfHashes)
