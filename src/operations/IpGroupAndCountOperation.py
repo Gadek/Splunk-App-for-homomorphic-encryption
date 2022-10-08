@@ -46,6 +46,8 @@ class IpGroupAndCountOperation(GroupAndCountOperation):
         self.prefix = self.__getPrefix(data)
 
         if self.prefix is None:
+            print("ERROR")
+            print("IP addresses have to have the same first 2 octets!")
             raise Exception("IP addresses have to have the same first 2 octets!")
 
         super().__init__(
@@ -61,7 +63,6 @@ class IpGroupAndCountOperation(GroupAndCountOperation):
     
     def __getPrefix(self, data):
         prefix = None
-
         for currIP in data:
             currIPPrefix = self.__splitIP(currIP)[0]
 
