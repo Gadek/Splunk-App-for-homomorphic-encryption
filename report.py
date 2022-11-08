@@ -155,6 +155,8 @@ class IpReport(Report):
         HE = Pyfhel()
         HE.contextGen(scheme='bfv', n=2**15, t_bits=17)
         HE.keyGen()
+        HE.relinKeyGen()
+        HE.rotateKeyGen()
         
         PyfhelUtils.saveHE('HE_context_and_keys/counting_and_groupping', HE)
 
