@@ -166,6 +166,8 @@ class FindMaliciousHashesOperation(Operation):
                     j = i + 1
                     
                     if j >= len(comparisons):
+                        # last one is left - just copy it
+                        tmpComparisons += [comparisons[i]]
                         break
 
                     tmpComp = comparisons[i] * comparisons[j]
