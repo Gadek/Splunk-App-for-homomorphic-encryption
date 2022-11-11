@@ -150,14 +150,30 @@ class FindMaliciousHashesOperation(Operation):
 
         if self.malicious is None:
             self.__loadMaliciousHashes()
-
+        
         for s in self.hashes:
-            comparison = self.one
+            comparisons = []
 
             for t in self.malicious:
-                comparison *= (s - t)
-                ~comparison
+                comp = (s - t)
+                ~comp
+                comparisons += [comp]
+            
+            while len(comparisons) > 1:
+                tmpComparisons = []
 
-            ret[s] = comparison
+                for i in range(0, len(comparisons), 2):
+                    j = i + 1
+                    
+                    if j >= len(comparisons):
+                        break
+
+                    tmpComp = comparisons[i] * comparisons[j]
+                    ~tmpComp
+                    tmpComparisons += [tmpComp]
+                
+                comparisons = tmpComparisons
+            
+            ret[s] = comparisons[0]
         
         return FindMaliciousHashesResult(ret, self.numberOfHashes)
