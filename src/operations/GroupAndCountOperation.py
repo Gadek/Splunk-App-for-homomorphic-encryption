@@ -60,6 +60,9 @@ class GroupAndCountOperation(Operation):
     def __validateData(self):
         if len(self.data) > 180:
             raise Exception("Data can have max 180 elements!")
+        
+        if len(self.data) < 2:
+            raise Exception("Data must have at least 2 elements!")
 
         for d in self.data:
             if not isinstance(d, int):

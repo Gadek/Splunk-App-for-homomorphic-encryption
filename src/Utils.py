@@ -76,7 +76,7 @@ def pow(x, n):
 
 def areCtxtsEqual(a, b, encrypted_one, HE_t):
     ret = pow(a - b, HE_t - 1)
-    ret = -ret + encrypted_one
+    ret = ret * (-1) + encrypted_one
 
     return ret
 
