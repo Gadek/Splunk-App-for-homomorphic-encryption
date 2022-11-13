@@ -20,7 +20,9 @@ class IpGroupAndCountResult(GroupAndCountResult):
 
         super().decrypt(HE)
 
-        for ip_int in self.result:
+        tmpResults = self.result.copy()
+        
+        for ip_int in tmpResults:
             ip_str = self.__int2ip(ip_int)
             ip_str = f'{decryptedPrefix}.{ip_str}'
             self.result[ip_str] = self.result.pop(ip_int)
