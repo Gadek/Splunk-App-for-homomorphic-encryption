@@ -68,11 +68,11 @@ class GroupAndCountOperation(Operation):
             if not isinstance(d, int):
                 raise Exception("Value must be an int!")
             
-            if d > 65536:
-                raise Exception("Max value is 65536. Values above are not supported!")
+            if d > 32767:
+                raise Exception("Max value is 32767. Values above are not supported!")
         
-            if d < 0:
-                raise Exception("Min value is 0. Negative values are not supported!")
+            if d < -32768:
+                raise Exception("Min value is -32768. Values below are not supported!")
 
     def encrypt(self, HE):
         self.max_bits = Utils.getHEMaxBits(HE)

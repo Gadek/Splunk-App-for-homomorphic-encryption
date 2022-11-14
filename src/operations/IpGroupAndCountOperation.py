@@ -21,7 +21,7 @@ class IpGroupAndCountResult(GroupAndCountResult):
         super().decrypt(HE)
 
         tmpResults = self.result.copy()
-        
+
         for ip_int in tmpResults:
             ip_str = self.__int2ip(ip_int)
             ip_str = f'{decryptedPrefix}.{ip_str}'
@@ -29,7 +29,7 @@ class IpGroupAndCountResult(GroupAndCountResult):
 
     def __int2ip(self, i):
         parts = []
-        
+
         i = np.array([i], dtype=np.ushort)[0]
 
         while i > 0:
@@ -101,6 +101,10 @@ class IpGroupAndCountOperation(GroupAndCountOperation):
         for x in ip:
             ret <<= 8
             ret |= int(x)
+        
+        ret = int(
+            np.array([ret], dtype=np.short)[0]
+        )
 
         return ret
     
