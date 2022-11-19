@@ -1,5 +1,5 @@
 import sys
-from Pyfhel import Pyfhel
+from Pyfhel import Pyfhel, PyCtxt
 import numpy as np
 import os, math
 
@@ -8,19 +8,28 @@ import src.PyfhelUtils as PyfhelUtils
 
 import src.Utils as Utils
 
+from src.operations.Operation import Operation, OperationResult
 from src.operations.AddNumbersOperation import AddNumbersOperation
 from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
 from src.operations.IpGroupAndCountOperation import IpGroupAndCountOperation
 from src.operations.GroupAndCountOperation import GroupAndCountOperation
 
+import pickle
+
 def getHEContext(loadSaveFromFS = True):
     if loadSaveFromFS and os.path.exists('HE_context_and_keys/he_test'):
         HE = PyfhelUtils.loadHE('HE_context_and_keys/he_test')
         return HE
 
+    # Context for Hashes
+    # HE = Pyfhel()
+    # HE.contextGen(scheme='bfv', n=2**14,  t_bits=17)
+    # HE.keyGen()
+    # HE.relinKeyGen()
+
+    # Context for grouping
     HE = Pyfhel()
-    # HE.contextGen(scheme='bfv', n=2**15,  t_bits=34)
     HE.contextGen(scheme='bfv', n=2**15,  t_bits=17)
     HE.keyGen()
     HE.relinKeyGen()
@@ -98,9 +107,18 @@ operation = IpGroupAndCountOperation([
     '10.0.0.199',
     '10.0.0.199',
 ])
+operation.attachContext(HE)
 operation.encrypt(HE)
-res = operation.run()
-res.decrypt(HE)
+operationPickled = pickle.dumps(operation)
 
-print(str(res))
+# Processor
+operationOnProcessor = pickle.loads(operationPickled)
+res = operationOnProcessor.run()
+runnedPickle = pickle.dumps(res)
+
+# Client
+resOnClient = pickle.loads(runnedPickle)
+resOnClient.decrypt(HE)
+
+print(str(resOnClient))
 print("-" * 20)

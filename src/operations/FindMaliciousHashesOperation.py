@@ -93,6 +93,7 @@ class FindMaliciousHashesOperation(Operation):
         self.hashes = hashes
         self.malicious = None
         self.max_bits = None
+        super().__init__()
 
     def encrypt(self, HE):
         self.max_bits = Utils.getHEMaxBits(HE)
