@@ -46,6 +46,7 @@ class AreStringsPresentInTableOperation(Operation):
     def __init__(self, strings = [], table =[]):
         self.strings = strings
         self.table = table
+        super().__init__()
 
     def encrypt(self, HE):
         max_bits = Utils.getHEMaxBits(HE)

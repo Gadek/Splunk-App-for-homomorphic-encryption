@@ -56,6 +56,7 @@ class GroupAndCountOperation(Operation):
     def __init__(self, data = []):
         self.data = data
         self.__validateData()
+        super().__init__()
     
     def __validateData(self):
         if len(self.data) > 180:
@@ -86,6 +87,12 @@ class GroupAndCountOperation(Operation):
             ])
 
     def run(self) -> GroupAndCountResult:
+        #====================
+        aHE = self.getAttachedHE()
+        self.zero = aHE.encode(0)
+        self.one = aHE.encode(1)
+        #====================
+
         counts = {}
 
         print("Preparing vectors for comparison...")

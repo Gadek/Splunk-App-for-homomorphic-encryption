@@ -15,6 +15,7 @@ class AddNumbersOperationResult(OperationResult):
 class AddNumbersOperation(Operation):
     def __init__(self, numbers = []):
         self.numbers = numbers
+        super().__init__()
     
     def encrypt(self, HE):
         for i in range(len(self.numbers)):
