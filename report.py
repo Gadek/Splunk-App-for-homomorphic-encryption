@@ -172,6 +172,7 @@ class IpReport(Report):
             ]
         
         operation = IpGroupAndCountOperation(ips_to_count)
+        operation.attachContext(HE)
         operation.encrypt(HE)
 
         return operation
