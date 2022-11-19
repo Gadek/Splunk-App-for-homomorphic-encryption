@@ -2,6 +2,8 @@ import copy
 from functools import reduce
 import numpy as np
 
+from Pyfhel import PyCtxt
+
 from src.operations.Operation import Operation, OperationResult
 import src.Utils as Utils
 
@@ -86,13 +88,21 @@ class GroupAndCountOperation(Operation):
                 self.data[i]
             ])
 
-    def run(self) -> GroupAndCountResult:
-        #====================
+    def __applyAttachedContext(self):
         aHE = self.getAttachedHE()
-        self.zero = aHE.encode(0)
-        self.one = aHE.encode(1)
-        #====================
 
+        for i in range(0, len(self.data)):
+            self.data[i] = PyCtxt(
+                pyfhel=aHE,
+                bytestring=self.data[i].to_bytes()
+            )
+        
+        self.zero = PyCtxt(pyfhel=aHE, bytestring=self.zero.to_bytes())
+        self.one  = PyCtxt(pyfhel=aHE, bytestring=self.one.to_bytes())
+    
+    def run(self) -> GroupAndCountResult:
+        self.__applyAttachedContext()
+        
         counts = {}
 
         print("Preparing vectors for comparison...")
