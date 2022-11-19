@@ -1,5 +1,5 @@
 import sys
-from Pyfhel import Pyfhel
+from Pyfhel import Pyfhel, PyCtxt
 import numpy as np
 import os, math
 
@@ -8,6 +8,7 @@ import src.PyfhelUtils as PyfhelUtils
 
 import src.Utils as Utils
 
+from src.operations.Operation import Operation, OperationResult
 from src.operations.AddNumbersOperation import AddNumbersOperation
 from src.operations.AreStringsPresentInTableOperation import AreStringsPresentInTableOperation
 from src.operations.FindMaliciousHashesOperation import FindMaliciousHashesOperation
@@ -100,11 +101,11 @@ print("-" * 20)
 operation = IpGroupAndCountOperation([
     '10.0.0.156',
     '10.0.0.156',
-    # '10.0.255.199',
-    # '10.0.0.156',
-    # '10.0.255.199',
-    # '10.0.0.199',
-    # '10.0.0.199',
+    '10.0.255.199',
+    '10.0.0.156',
+    '10.0.255.199',
+    '10.0.0.199',
+    '10.0.0.199',
 ])
 operation.attachContext(HE)
 operation.encrypt(HE)
@@ -119,5 +120,5 @@ runnedPickle = pickle.dumps(res)
 resOnClient = pickle.loads(runnedPickle)
 resOnClient.decrypt(HE)
 
-print(str(res))
+print(str(resOnClient))
 print("-" * 20)
