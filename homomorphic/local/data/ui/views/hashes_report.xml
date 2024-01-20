@@ -1,0 +1,107 @@
+<form version="1.1">
+  <label>hashes report</label>
+  <description>If you want to analyse hashes, check "analyse" checkbox.</description>
+  <fieldset submitButton="true" autoRun="true">
+    <input type="time" token="datetime">
+      <label>Date range</label>
+      <default>
+        <earliest>1663678800</earliest>
+        <latest>1663681449.74</latest>
+      </default>
+    </input>
+    <input type="text" token="src_idx">
+      <label>Source Index</label>
+      <initialValue>hashes</initialValue>
+    </input>
+    <input type="checkbox" token="analyse">
+      <label>analyse hashes</label>
+      <choice value="1">analyse</choice>
+      <delimiter> </delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <event>
+        <search>
+          <query>|homomorphic $src_idx$ hash $datetime.earliest$ $datetime.latest$ $analyse$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="list.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </event>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>hashes to analyse</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ | table extracted_host hash path malicious | dedup hash | where isNull(malicious)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>All logs</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ | table _time extracted_host hash path malicious</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">preview</option>
+        <format type="color" field="malicious">
+          <colorPalette type="expression">if (match(malicious,"1"),"#FF0000", "#666666")</colorPalette>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Unique hashes</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ | stats  values(extracted_host) as extracted_host  values(path) as path values(malicious) as malicious by hash</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Pie chart</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ |  fillnull value="unknown" malicious | stats count(malicious) by malicious</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"False": 0x00FF00, "True": 0xFF0000 ,"Unknown": 0x0000FF}</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Line chart</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ |  fillnull value="unknown" malicious |  timechart count(malicious) by malicious</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"False": 0x00FF00, "True": 0xFF0000 ,"Unknown": 0x0000FF}</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

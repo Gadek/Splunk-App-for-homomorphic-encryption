@@ -1,0 +1,83 @@
+<form version="1.1">
+  <label>ip grouping</label>
+  <description>If you want to group ip addresses, select "analyse" checkbox.</description>
+  <fieldset submitButton="true" autoRun="true">
+    <input type="time" token="datetime">
+      <label>Date range</label>
+      <default>
+        <earliest>1663678800</earliest>
+        <latest>1663681449.74</latest>
+      </default>
+    </input>
+    <input type="text" token="src_idx">
+      <label>Source Index</label>
+      <initialValue>authentication</initialValue>
+    </input>
+    <input type="checkbox" token="analyse">
+      <label>analyse</label>
+      <choice value="1">analyse</choice>
+      <delimiter> </delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <event>
+        <search>
+          <query>|homomorphic $src_idx$ ip $datetime.earliest$ $datetime.latest$ $analyse$</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="list.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </event>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>All logs</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ | table _time extracted_host source_ip user info</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">preview</option>
+        <format type="color" field="malicious">
+          <colorPalette type="expression">if (match(malicious,"1"),"#FF0000", "#666666")</colorPalette>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <title>Unique IPs</title>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ | stats  values(extracted_host) as extracted_host  by source_ip</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>index=$src_idx$ earliest=$datetime.earliest$ latest=$datetime.latest$ |  timechart count(source_ip) by source_ip</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.fieldColors">{"False": 0x00FF00, "True": 0xFF0000 ,"Unknown": 0x0000FF}</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>
